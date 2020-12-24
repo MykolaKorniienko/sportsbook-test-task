@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 import { Form, Input, Button } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css';
 import './index.css';
+import { fetchService } from "../../api";
 
 function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  
 
-  const onFinish = values => {
-    console.log('Received values of form: ', values);
+  const onFinish = async values => {
+    const settings = {
+      body: JSON.stringify({...values, two_factor_auth_code: ""})
+    };
+    const result = await fetchService(undefined, settings);
+    console.log(result);
   };
 
   return (
@@ -32,11 +38,10 @@ function Login() {
           ]}
         >
           <Input 
-            prefix={<MailOutlined className="site-form-item-icon" />} 
-            placeholder="Email" 
-            type="email"
-            value={email}
-            onChange={setEmail} 
+            prefix={<UserOutlined className="site-form-item-icon" />} 
+            placeholder="Username"
+            value={username}
+            onChange={setUsername} 
           />
         </Form.Item>
         <Form.Item
