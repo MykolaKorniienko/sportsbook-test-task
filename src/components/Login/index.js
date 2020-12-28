@@ -1,22 +1,28 @@
-import React, { useState } from "react";
-import { Form, Input, Button } from 'antd';
+import React, { useState, useEffect } from "react";
+import { Form, Input, Button, Spin, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css';
 import './index.css';
-import { fetchService } from "../../api";
+import { connect } from 'react-redux';
+import { loginUserAction } from '../../redux/actions/authenticationActions';
+import {withRouter} from 'react-router';
 
-function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  
+const Login = props => {
 
-  const onFinish = async values => {
-    const settings = {
-      body: JSON.stringify({...values, two_factor_auth_code: ""})
-    };
-    const result = await fetchService(undefined, settings);
-    console.log(result);
+  const onFinish = async user => {
+    props.auth(user);
   };
+
+  useEffect(() => {
+    if (props.response) {
+      if (props.response.data && props.response.data.access_token) {
+        window.location.replace("/");
+        message.success('You are logged in!');
+      } else {
+        message.error(props.response.message || 'Something goes wrong');
+      }
+    }
+  });    
 
   return (
     <div className="container">
@@ -39,9 +45,7 @@ function Login() {
         >
           <Input 
             prefix={<UserOutlined className="site-form-item-icon" />} 
-            placeholder="Username"
-            value={username}
-            onChange={setUsername} 
+            placeholder="Username" 
           />
         </Form.Item>
         <Form.Item
@@ -57,11 +61,9 @@ function Login() {
             prefix={<LockOutlined className="site-form-item-icon" />}
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={setPassword}
           />
         </Form.Item>
-
+        {props.loading && <Spin/>}
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-form-button">
             Log in
@@ -70,6 +72,16 @@ function Login() {
       </Form>
     </div>
   );
-}
+};
 
-export default Login;
+const mapStateToProps = (state) => {
+  return {
+  response: state.login.response,
+  loading: state.loading.loading
+}}
+
+const mapDispatchToProps = {
+	auth: loginUserAction
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Login));

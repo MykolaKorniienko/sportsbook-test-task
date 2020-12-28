@@ -8,25 +8,30 @@ import {
 } from "react-router-dom";
 import Home from './components/Home';
 import Login from './components/Login';
+import { Provider } from 'react-redux';
+import configureStore from './redux/store/configureStore';
 
 ReactDOM.render(
-  <Router>
-    <Switch>
-      <Route path="/login" >
-        <Login />
-      </Route>
-      <PrivateRoute path="/">
-        <Home />
-      </PrivateRoute>
-    </Switch>
-  </Router>,
+  <Provider store={configureStore()}>
+    <Router>
+      <Switch>
+        <Route exact path="/login" >
+          <Login />
+        </Route>
+        <PrivateRoute path="/">
+          <Home />
+        </PrivateRoute>
+      </Switch>
+    </Router>
+  </Provider>,
   document.getElementById('root')
 );
 
 function PrivateRoute({children}) {
-  let auth = localStorage.getItem('authToken');
+  let auth = localStorage.getItem('token');
   return (
     <Route
+      exact 
       render={() =>
         auth ? (
           children
